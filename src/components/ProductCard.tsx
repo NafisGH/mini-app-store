@@ -1,9 +1,11 @@
-import type { ProductType } from "../types/products";
+// src/components/ProductCard.tsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import type { ProductType } from "../types/products";
 
 interface ProductCardProps {
   product: ProductType;
-  onAddToCart: (product: ProductType) => void;
+  onAddToCart(product: ProductType): void;
 }
 
 export default function ProductCard({
@@ -14,11 +16,17 @@ export default function ProductCard({
 
   return (
     <div className="card">
-      <img className="card-img" src={product.image} alt={product.title} />
+      <Link to={`/product/${product.id}`}>
+        <img className="card-img" src={product.image} alt={product.title} />
+      </Link>
+
       <div className="card-body">
-        <h3 className="card-title">{product.title}</h3>
+        <h3 className="card-title">
+          <Link to={`/product/${product.id}`}>{product.title}</Link>
+        </h3>
         <p className="card-price">{product.price.toLocaleString()} ₽</p>
       </div>
+
       <div className="card-actions">
         <button className="btn" onClick={() => setLikes((n) => n + 1)}>
           ♥ {likes}

@@ -4,57 +4,56 @@ import "./index.css";
 import Header from "./components/Header";
 import ProductList from "./components/ProductList";
 import SearchBar from "./components/SearchBar";
+import ProductDetails from "./components/ProductDetails";
 import { fetchProducts } from "./api/products";
 import type { ProductType } from "./types/products";
+import { Routes, Route } from "react-router-dom";
 
 export default function App() {
-  // Корзина
+  // корзина
   const [cartItems, setCartItems] = useState<ProductType[]>([]);
 
-  // Поиск
+  // поиск
   const [query, setQuery] = useState<string>("");
 
-  // Данные с сервера
+  // данные каталога
   const [products, setProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Триггер для ручного перезапроса (кнопка «Повторить попытку»)
   const [reloadTick, setReloadTick] = useState(0);
 
-  // загружаем товары при монтировании/повторной попытке
   useEffect(() => {
     const ac = new AbortController();
-
-    async function load() {
+    (async () => {
       try {
         setLoading(true);
         setError(null);
         const items = await fetchProducts(ac.signal);
         setProducts(items);
       } catch (e) {
-        // Если это AbortError — просто выходим (компонент размонтирован)
-        if (e instanceof Error && e.name === "AbortError") return;
-        const msg = e instanceof Error ? e.message : String(e);
-        setError(msg);
+        if (
+          typeof e === "object" &&
+          e !== null &&
+          "name" in e &&
+          (e as { name?: string }).name !== "AbortError"
+        ) {
+          setError(e instanceof Error ? e.message : String(e));
+        }
       } finally {
         setLoading(false);
       }
-    }
-
-    load();
-    return () => ac.abort(); // отменяем fetch при размонтировании/перезапуске эффекта
+    })();
+    return () => ac.abort();
   }, [reloadTick]);
 
   const handleAddToCart = (product: ProductType) => {
-    setCartItems((prev) => [...prev, product]); // иммутабельное обновление
+    setCartItems((prev) => [...prev, product]);
   };
 
   const normalized = query.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
-    const source = products;
-    if (!normalized) return source;
-    return source.filter((p) => p.title.toLowerCase().includes(normalized));
+    if (!normalized) return products;
+    return products.filter((p) => p.title.toLowerCase().includes(normalized));
   }, [products, normalized]);
 
   return (
@@ -62,42 +61,59 @@ export default function App() {
       <Header cartCount={cartItems.length} />
 
       <main>
-        <h2 className="page-title">Каталог товаров</h2>
-        <SearchBar
-          value={query}
-          onChange={setQuery}
-          placeholder="Поиск по названию…"
-        />
-        {/* Состояния загрузки/ошибки */}
-        {loading && <div className="spinner">Загрузка…</div>}
+        <Routes>
+          {/* Главная: поиск + список */}
+          <Route
+            path="/"
+            element={
+              <>
+                <h2 className="page-title">Каталог товаров</h2>
+                <SearchBar
+                  value={query}
+                  onChange={setQuery}
+                  placeholder="Поиск по названию…"
+                />
 
-        {error && (
-          <div className="alert">
-            <div>Не удалось загрузить товары: {error}</div>
-            <button
-              className="btn"
-              onClick={() => setReloadTick((n) => n + 1)}
-              type="button"
-            >
-              Повторить попытку
-            </button>
-          </div>
-        )}
+                {loading && <div className="spinner">Загрузка…</div>}
+                {error && (
+                  <div className="alert">
+                    <div>Не удалось загрузить товары: {error}</div>
+                    <button
+                      className="btn"
+                      onClick={() => setReloadTick((n) => n + 1)}
+                      type="button"
+                    >
+                      Повторить попытку
+                    </button>
+                  </div>
+                )}
 
-        {/* Список товаров (показываем только когда не грузимся и нет ошибки) */}
-        {!loading && !error && (
-          <>
-            <ProductList
-              products={filteredProducts}
-              onAddToCart={handleAddToCart}
-            />
-            {filteredProducts.length === 0 && (
-              <p style={{ marginTop: 12, opacity: 0.7 }}>
-                Ничего не найдено по запросу «{query}».
-              </p>
-            )}
-          </>
-        )}
+                {!loading && !error && (
+                  <>
+                    <ProductList
+                      products={filteredProducts}
+                      onAddToCart={handleAddToCart}
+                    />
+                    {filteredProducts.length === 0 && (
+                      <p style={{ marginTop: 12, opacity: 0.7 }}>
+                        Ничего не найдено по запросу «{query}».
+                      </p>
+                    )}
+                  </>
+                )}
+              </>
+            }
+          />
+
+          {/* Страница карточки товара */}
+          <Route
+            path="/product/:id"
+            element={<ProductDetails onAddToCart={handleAddToCart} />}
+          />
+
+          {/* Страница корзины */}
+          <Route path="/cart" element={<p>Корзина (в разработке)</p>} />
+        </Routes>
       </main>
     </div>
   );

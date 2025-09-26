@@ -1,3 +1,5 @@
+import { Link, NavLink } from "react-router-dom";
+
 interface HeaderProps {
   cartCount?: number;
 }
@@ -5,17 +7,22 @@ interface HeaderProps {
 export default function Header({ cartCount }: HeaderProps) {
   return (
     <header className="header">
-      <h1 className="brand">Мой магазин</h1>
+      <h1 className="brand">
+        <Link to="/" className="nav-link">
+          Мой магазин
+        </Link>
+      </h1>
       <nav className="nav">
-        <a className="nav-link" href="#">
+        <NavLink to="/" className="nav-link">
           Каталог
-        </a>
-        <a className="nav-link" href="#">
+        </NavLink>
+
+        <NavLink to="/cart" className="nav-link">
           Корзина
           <span className="badge" aria-label="Количество товаров в корзине">
-            {cartCount}
+            {cartCount ?? 0}
           </span>
-        </a>
+        </NavLink>
       </nav>
     </header>
   );
