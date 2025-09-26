@@ -131,3 +131,39 @@ body {
   color: #fff;
   border: 1px solid #111827;
 }
+.searchbar {
+  position: relative;
+  margin: 8px 0 16px;
+}
+
+.searchbar-input {
+  width: 100%;
+  padding: 10px 36px 10px 12px; /* справа место под кнопку очистки */
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+.searchbar-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.searchbar-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  line-height: 1;
+}
+.searchbar-clear:hover {
+  background: #f3f4f6;
+}
