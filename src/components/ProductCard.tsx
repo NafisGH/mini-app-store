@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { ProductType } from "../types/products";
+import styles from "./ProductCard.module.css";
 
 interface ProductCardProps {
   product: ProductType;
@@ -17,7 +18,11 @@ export default function ProductCard({
   return (
     <div className="card">
       <Link to={`/product/${product.id}`}>
-        <img className="card-img" src={product.image} alt={product.title} />
+        <img
+          className={styles.cardImg}
+          src={product.image}
+          alt={product.title}
+        />
       </Link>
 
       <div className="card-body">

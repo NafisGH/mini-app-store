@@ -1,9 +1,9 @@
 // src/components/ProductDetails.tsx
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-
 import { fetchProductById } from "../api/products";
 import type { ProductType } from "../types/products";
+import styles from "./ProductDetails.module.css";
 
 interface ProductDetailsProps {
   onAddToCart(product: ProductType): void;
@@ -54,8 +54,8 @@ export default function ProductDetails({ onAddToCart }: ProductDetailsProps) {
   if (!product) return null;
 
   return (
-    <div className="card" style={{ overflow: "hidden" }}>
-      <img className="card-img" src={product.image} alt={product.title} />
+    <div className={`card ${styles.root}`}>
+      <img className={styles.cardImg} src={product.image} alt={product.title} />
       <div className="card-body">
         <h2 className="card-title" style={{ fontSize: 20 }}>
           {product.title}
