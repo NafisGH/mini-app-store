@@ -1,10 +1,9 @@
 import { Link, NavLink } from "react-router-dom";
+import { useAppSelector } from "../store/hooks";
+import { selectCartCount } from "../store/cartSlice";
 
-interface HeaderProps {
-  cartCount?: number;
-}
-
-export default function Header({ cartCount }: HeaderProps) {
+export default function Header() {
+  const cartCount = useAppSelector(selectCartCount);
   return (
     <header className="header">
       <h1 className="brand">

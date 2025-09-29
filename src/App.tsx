@@ -11,7 +11,7 @@ import { Routes, Route } from "react-router-dom";
 
 export default function App() {
   // корзина
-  const [cartItems, setCartItems] = useState<ProductType[]>([]);
+  // const [cartItems, setCartItems] = useState<ProductType[]>([]);
 
   // поиск
   const [query, setQuery] = useState<string>("");
@@ -46,9 +46,9 @@ export default function App() {
     return () => ac.abort();
   }, [reloadTick]);
 
-  const handleAddToCart = (product: ProductType) => {
-    setCartItems((prev) => [...prev, product]);
-  };
+  // const handleAddToCart = (product: ProductType) => {
+  //   setCartItems((prev) => [...prev, product]);
+  // };
 
   const normalized = query.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
@@ -58,7 +58,7 @@ export default function App() {
 
   return (
     <div className="container">
-      <Header cartCount={cartItems.length} />
+      <Header />
 
       <main>
         <Routes>
@@ -92,7 +92,7 @@ export default function App() {
                   <>
                     <ProductList
                       products={filteredProducts}
-                      onAddToCart={handleAddToCart}
+                      // onAddToCart={handleAddToCart}
                     />
                     {filteredProducts.length === 0 && (
                       <p style={{ marginTop: 12, opacity: 0.7 }}>
@@ -106,10 +106,7 @@ export default function App() {
           />
 
           {/* Страница карточки товара */}
-          <Route
-            path="/product/:id"
-            element={<ProductDetails onAddToCart={handleAddToCart} />}
-          />
+          <Route path="/product/:id" element={<ProductDetails />} />
 
           {/* Страница корзины */}
           <Route path="/cart" element={<p>Корзина (в разработке)</p>} />

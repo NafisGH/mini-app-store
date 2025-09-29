@@ -3,17 +3,20 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { ProductType } from "../types/products";
 import styles from "./ProductCard.module.css";
+import { useAppDispatch } from "../store/hooks";
+import { addItem } from "../store/cartSlice";
 
 interface ProductCardProps {
   product: ProductType;
-  onAddToCart(product: ProductType): void;
+  //   onAddToCart(product: ProductType): void;
 }
 
 export default function ProductCard({
   product,
-  onAddToCart,
-}: ProductCardProps) {
+}: //   onAddToCart,
+ProductCardProps) {
   const [likes, setLikes] = useState<number>(0);
+  const dispatch = useAppDispatch();
 
   return (
     <div className="card">
@@ -38,7 +41,7 @@ export default function ProductCard({
         </button>
         <button
           className="btn btn-primary"
-          onClick={() => onAddToCart(product)}
+          onClick={() => dispatch(addItem(product))}
         >
           В корзину
         </button>

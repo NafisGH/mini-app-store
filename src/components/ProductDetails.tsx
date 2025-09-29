@@ -4,18 +4,17 @@ import { useParams, Link } from "react-router-dom";
 import { fetchProductById } from "../api/products";
 import type { ProductType } from "../types/products";
 import styles from "./ProductDetails.module.css";
+import { useAppDispatch } from "../store/hooks";
+import { addItem } from "../store/cartSlice";
 
-interface ProductDetailsProps {
-  onAddToCart(product: ProductType): void;
-}
-
-export default function ProductDetails({ onAddToCart }: ProductDetailsProps) {
+export default function ProductDetails() {
   const params = useParams(); // { id: string | undefined }
   const id = Number(params.id);
 
   const [product, setProduct] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (!Number.isFinite(id)) {
@@ -70,7 +69,7 @@ export default function ProductDetails({ onAddToCart }: ProductDetailsProps) {
         </Link>
         <button
           className="btn btn-primary"
-          onClick={() => onAddToCart(product)}
+          onClick={() => dispatch(addItem(product))}
         >
           В корзину
         </button>
