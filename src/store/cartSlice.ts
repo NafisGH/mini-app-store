@@ -11,7 +11,7 @@ export type CartItem = {
   qty: number;
 };
 
-type CartState = {
+export type CartState = {
   // ключ — id товара
   items: Record<number, CartItem>;
 };

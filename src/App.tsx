@@ -4,17 +4,34 @@ import "./index.css";
 import Header from "./components/Header";
 import ProductList from "./components/ProductList";
 import SearchBar from "./components/SearchBar";
-import ProductDetails from "./components/ProductDetails";
+// import ProductDetails from "./components/ProductDetails";
 import { fetchProducts } from "./api/products";
 import type { ProductType } from "./types/products";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useSearchParams } from "react-router-dom";
+// import CartPage from "./pages/CartPage";
+import { lazy, Suspense } from "react";
+
+const ProductDetails = lazy(() => import("./components/ProductDetails"));
+const CartPage = lazy(() => import("./pages/CartPage"));
 
 export default function App() {
   // корзина
   // const [cartItems, setCartItems] = useState<ProductType[]>([]);
 
   // поиск
-  const [query, setQuery] = useState<string>("");
+  // const [query, setQuery] = useState<string>("");
+  const [params, setParams] = useSearchParams();
+  const query = params.get("q") ?? "";
+
+  const setQuery = (q: string) => {
+    const next = new URLSearchParams(params);
+    if (q) {
+      next.set("q", q);
+    } else {
+      next.delete("q");
+    }
+    setParams(next, { replace: true }); // чтобы не плодить историю
+  };
 
   // данные каталога
   const [products, setProducts] = useState<ProductType[]>([]);
@@ -61,56 +78,58 @@ export default function App() {
       <Header />
 
       <main>
-        <Routes>
-          {/* Главная: поиск + список */}
-          <Route
-            path="/"
-            element={
-              <>
-                <h2 className="page-title">Каталог товаров</h2>
-                <SearchBar
-                  value={query}
-                  onChange={setQuery}
-                  placeholder="Поиск по названию…"
-                />
+        <Suspense fallback={<div className="spinner">Загрузка…</div>}>
+          <Routes>
+            {/* Главная: поиск + список */}
+            <Route
+              path="/"
+              element={
+                <>
+                  <h2 className="page-title">Каталог товаров</h2>
+                  <SearchBar
+                    value={query}
+                    onChange={setQuery}
+                    placeholder="Поиск по названию…"
+                  />
 
-                {loading && <div className="spinner">Загрузка…</div>}
-                {error && (
-                  <div className="alert">
-                    <div>Не удалось загрузить товары: {error}</div>
-                    <button
-                      className="btn"
-                      onClick={() => setReloadTick((n) => n + 1)}
-                      type="button"
-                    >
-                      Повторить попытку
-                    </button>
-                  </div>
-                )}
+                  {loading && <div className="spinner">Загрузка…</div>}
+                  {error && (
+                    <div className="alert">
+                      <div>Не удалось загрузить товары: {error}</div>
+                      <button
+                        className="btn"
+                        onClick={() => setReloadTick((n) => n + 1)}
+                        type="button"
+                      >
+                        Повторить попытку
+                      </button>
+                    </div>
+                  )}
 
-                {!loading && !error && (
-                  <>
-                    <ProductList
-                      products={filteredProducts}
-                      // onAddToCart={handleAddToCart}
-                    />
-                    {filteredProducts.length === 0 && (
-                      <p style={{ marginTop: 12, opacity: 0.7 }}>
-                        Ничего не найдено по запросу «{query}».
-                      </p>
-                    )}
-                  </>
-                )}
-              </>
-            }
-          />
+                  {!loading && !error && (
+                    <>
+                      <ProductList
+                        products={filteredProducts}
+                        // onAddToCart={handleAddToCart}
+                      />
+                      {filteredProducts.length === 0 && (
+                        <p style={{ marginTop: 12, opacity: 0.7 }}>
+                          Ничего не найдено по запросу «{query}».
+                        </p>
+                      )}
+                    </>
+                  )}
+                </>
+              }
+            />
 
-          {/* Страница карточки товара */}
-          <Route path="/product/:id" element={<ProductDetails />} />
+            {/* Страница карточки товара */}
+            <Route path="/product/:id" element={<ProductDetails />} />
 
-          {/* Страница корзины */}
-          <Route path="/cart" element={<p>Корзина (в разработке)</p>} />
-        </Routes>
+            {/* Страница корзины */}
+            <Route path="/cart" element={<CartPage />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   );
