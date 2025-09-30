@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { cartReducer, type CartState } from "./cartSlice";
+import { productApi } from "./api";
 
 const PERSIST_KEY = "cart";
 
@@ -19,7 +20,9 @@ function loadPreloadedState(): { cart: CartState } | undefined {
 export const store = configureStore({
   reducer: {
     cart: cartReducer,
+    [productApi.reducerPath]: productApi.reducer,
   },
+  middleware: (getDefault) => getDefault().concat(productApi.middleware), // ← добавляем middleware
   preloadedState: loadPreloadedState(),
 });
 

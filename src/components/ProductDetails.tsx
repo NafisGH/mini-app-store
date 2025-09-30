@@ -1,56 +1,52 @@
-// src/components/ProductDetails.tsx
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { fetchProductById } from "../api/products";
-import type { ProductType } from "../types/products";
-import styles from "./ProductDetails.module.css";
+import { Link, useParams } from "react-router-dom";
 import { useAppDispatch } from "../store/hooks";
 import { addItem } from "../store/cartSlice";
+import styles from "./ProductDetails.module.css";
+import { useGetProductQuery } from "../store/api"; // ← новый импорт
 
 export default function ProductDetails() {
-  const params = useParams(); // { id: string | undefined }
-  const id = Number(params.id);
-
-  const [product, setProduct] = useState<ProductType | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const id = Number(useParams().id);
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    if (!Number.isFinite(id)) {
-      setError("Некорректный id товара");
-      setLoading(false);
-      return;
-    }
-    const ac = new AbortController();
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const item = await fetchProductById(id, ac.signal);
-        setProduct(item);
-      } catch (e: unknown) {
-        if ((e as Error)?.name !== "AbortError") {
-          setError(e instanceof Error ? e.message : String(e));
-        }
-      } finally {
-        setLoading(false);
-      }
-    })();
-    return () => ac.abort();
-  }, [id]);
+  const {
+    data: product,
+    isLoading,
+    isError,
+    refetch,
+    error,
+  } = useGetProductQuery(id, { skip: !Number.isFinite(id) }); // защита от NaN
 
-  if (loading) return <div className="spinner">Загрузка…</div>;
-  if (error)
+  if (!Number.isFinite(id)) {
     return (
       <div className="alert">
-        <div>Ошибка: {error}</div>
-        <Link className="btn" to="/">
-          Назад к каталогу
+        Некорректный id товара. <Link to="/">Назад</Link>
+      </div>
+    );
+  }
+
+  if (isLoading) return <div className="spinner">Загрузка…</div>;
+  if (isError || !product) {
+    return (
+      <div className="alert">
+        Не удалось загрузить товар.
+        <div style={{ marginTop: 8 }}>
+          <button className="btn" onClick={() => refetch()}>
+            Повторить
+          </button>
+          {error && (
+            <pre style={{ opacity: 0.6 }}>
+              {typeof error === "object" && error !== null && "status" in error
+                ? String((error as { status?: unknown }).status)
+                : String(error)}
+            </pre>
+          )}
+        </div>
+        <Link className="btn" to="/" style={{ marginLeft: 8 }}>
+          ← К каталогу
         </Link>
       </div>
     );
-  if (!product) return null;
+  }
 
   return (
     <div className={`card ${styles.root}`}>
